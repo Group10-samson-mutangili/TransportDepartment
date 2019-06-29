@@ -3,10 +3,11 @@
 <%@ page import="java.sql.*"%>
 <%@ page import="java.io.*" %>
 <%@ page import="com.samson.*" %>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>Bookings</title>
+<title>Scheduled academic trips</title>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -55,14 +56,14 @@
 	<br>
 	<div>
 			<%
-				String url="jdbc:mysql://localhost:3306/group_project";
-				String dbname = "root";
-				String pass = "";
-				String search = request.getParameter("search");
+				DAOHandler.createTable();
+				String search = "";
+				search = (String)request.getAttribute("search");
+				search = request.getParameter("search");
 				String query;
 				
 				if(search != null){
-					query = "select * from scheduled_trips where destination like '%"+search+"%' or departure_date like '%"+search+"%' or return_date like '%"+search+"%' or no_of_students like '%"+search+"%' or faculty like '%"+search+"%' or department like '%"+search+"%'";
+					query = "select * from scheduled_trips where reference_no like '%"+search+"%' or unit_code like '%"+search+"%' or unit_title like '%"+search+"%' or date_of_trip like '%"+search+"%' or bus_assigned like '%"+search+"%'";
 				}
 				else {
 					query = "select * from scheduled_trips";
@@ -74,11 +75,21 @@
 					e.printStackTrace();
 				}
 				
-				Connection connection = null;
+				Connection con = DAOHandler.getConnection();
 				Statement statement = null;
 				ResultSet rs = null;
 				
 			%>
+			<c:choose>
+				<c:when test='${message ne ""}'>
+					<p style="color: green; align: text-center;">${message }</p>
+				</c:when>
+			</c:choose>
+			<c:choose>
+				<c:when test='${message1 ne ""}'>
+					<p style="color: red; align: text-center;">${message1 }</p>
+				</c:when>
+			</c:choose>
 
 			<table class="table table-hover table-bordered" align="center" >
 			<tr>
@@ -87,20 +98,19 @@
 			<thead>
 				<tr >
 					<th scope="col">S/NO</th>
-					<th scope="col">Destination</th>
-					<th scope="col">departure Date</th>
-					<th scope="col">Return Data</th>
-					<th scope="col">Passengers</th>
-					<th scope="col">Faculty</th>
-					<th scope="col">Department</th>
+					<th scope="col">Trip reference<br>Number</th>
+					<th scope="col">Trip Days</th>
+					<th scope="col">Unit code</th>
+					<th scope="col">Unit title</th>
+					<th scope="col">Date of trip</th>
+					<th scope="col">Bus Assigned</th>
+					<th scope="col">Bus capacity</th>
 					<th class="text-right">Actions</th>
 				</tr>
 			</thead>
 			
 			<%
 				try{
-					//create a connection
-					Connection con = DriverManager.getConnection(url, dbname, pass);
 					//create a statement
 					statement = con.createStatement();
 					
@@ -111,83 +121,20 @@
 						<tbody>
 							<tr>
 							<td><%= i++ %></td>
-							<td><%= rs.getString("destination")%></td>
-							<td><%= rs.getString("departure_date")%></td>
-							<td><%= rs.getString("return_date")%></td>
-							<td><%= rs.getInt("no_of_students")%></td>
-							<td><%= rs.getString("faculty")%></td>
-							<td><%= rs.getString("department") %></td>
+							<td><%= rs.getString("reference_no")%></td>
+							<td><%= rs.getInt("trip_days")%></td>
+							<td><%= rs.getString("unit_code")%></td>
+							<td><%= rs.getString("unit_title")%></td>
+							<td><%= rs.getString("date_of_trip")%></td>
+							<td><%= rs.getString("bus_assigned")%></td>
+							<td><%= rs.getString("bus_capacity")%></td>
 							
 							<td class="text-right">
-								<button name="edit"  class="btn btn-primary" data-toggle="modal" data-target="#edit_modal<%= rs.getInt("id")%>" style="width:80px;">Edit</button>
+								<!--  <button name="edit"  class="btn btn-primary" data-toggle="modal" data-target="#edit_modal" style="width:80px;">Edit</button>-->
 								<button name="delete"  data-toggle="modal" data-target="#delete_modal<%= rs.getInt("id")%>" class="btn btn-danger" style="width:80px;" >Delete</button>
 							</td>
 						</tr>
-						
-	<div class="container">
-		<div class="row">
-			<div class="col-xs-12">
-				<div class="modal modal-danger " id="edit_modal<%= rs.getInt("id")%>" tabindex="-1">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h4 class="modal-title pull-left">Edit trip details</h4>
-								<button class="close" data-dismiss="modal">&times;</button>
-							</div>
-							<div class="modal-body">
-							<form action="EditTrip" method="POST">
-								<input type="hidden" name="id" value='<%=rs.getInt("id") %>'/>
-								<div class="form-group">
-								 		<label for="destination">Destination</label>
-									 	<input type="text" id="destination" class="form-control" name="destination" value="<%= rs.getString("destination")%>">
-									</div>
-									<div class="form-group">
-										<label for="departure_date">Departure date</label>
-										<input type="date" id="departure_date" class="form-control" name="departure_date" value="<%= rs.getString("departure_date")%>">
-									</div>
-									<div class="form-group">
-										<label for="return_date">Return date</label>
-										<input type="date" id="return_date" class="form-control" name="return_date" value="<%= rs.getString("return_date")%>">
-									</div>
-									<div class="form-group">
-										 <label for="passengers">Number of passengers</label>
-										 <input type="number" id="passengers" class="form-control" name="passengers" value="<%= rs.getInt("no_of_students")%>">
-									</div>
-								<div class="form-group">
-								<label for="faculty">Faculty</label>
-									<select id="faculty" name="faculty" class="form-control">
-										<option selected><%= rs.getString("faculty")%></option>
-										<option>Science</option>
-										<option>Education</option>
-										<option>Veterinary medicine</option>
-										<option>Health Sciences</option>
-										<option>Agriculture</option>
-									</select>
-								</div>
-								<div class="form-group">
-								<label for="department">Department</label>
-								<select id="department" name="department" class="form-control">
-									<option><%= rs.getString("department") %></option>
-									<option>Computer Science</option>
-									<option>Molecular biology</option>
-									<option>Food and nutrition</option>
-									<option>Mathematics</option>
-									<option>Physics</option>
-								</select>
-								</div>
-								<div class="modal-footer">
-									<button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-									<button type="submit" class="btn btn-warning">Update</button>
-								</div>
-							</form>
-									
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+					
 						
 	<div class="container">
 		<div class="row">
@@ -228,7 +175,22 @@
 			%>
 
 </table>
-
+<%
+PreparedStatement stmt = con.prepareStatement(query);
+rs = stmt.executeQuery();
+	if(!rs.next()){
+		if(search == null){
+	%>
+	<p style="color: red;">There are no scheduled trips at the moment.</p>
+	
+	<%
+		} else{
+			%>
+			<p style="color: red;">There are no search results</p>
+			<%
+		}
+	}
+%>	
 
 
 </div>
@@ -238,3 +200,135 @@
 
 </body>
 </html>
+
+<script language="javascript" >
+	//select all  text elements
+	var destination = document.forms['vform']['destination'];
+	var departure_date= document.forms['vform']['departure_date'];
+	var return_date = document.forms['vform']['return_date'];
+	var passengers = document.forms['vform']['passengers'];
+	var faculty = document.forms['vform']['faculty'];
+	var department = document.forms['vform']['department'];
+
+	//selecting all error display elements
+	var destination_error = document.getElementById('destination_error');
+	var departure_error = document.getElementById('departure_error');
+	var return_error = document.getElementById('return_error');
+	var passengers_error = document.getElementById('passengers_error');
+	var faculty_error = document.getElementById('faculty_error');
+	var department_error = document.getElementById('department_error');
+
+	//setting all event listners
+	destination.addEventListener('blur', destinationVerify, true);
+	departure_date.addEventListener('blur', departureVerify, true);
+	return_date.addEventListener('blur', returnVerify, true);
+	passengers.addEventListener('blur', passengersVerify, true);
+	faculty.addEventListener('blur', facultyVerify, true);
+	department.addEventListener('blur', departmentVerify, true);
+
+	function Validate(){
+		if(destination.value == ""){
+			destination.style.border = "1px solid red";
+			document.getElementById('destination_div').style.color = "red";
+			destination_error.textContent = " Destination is required";
+			destination.focus();
+			return false;
+		}
+
+		if(departure_date.value == ""){
+			departure_date.style.border = "1px solid red";
+			document.getElementById('departure_div').style.color = "red";
+			departure_error.textContent = "Departure date is required";
+			departure_date.focus();
+			return false;
+		}
+		
+		if(return_date.value == ""){
+			return_date.style.border = "1px solid red";
+			document.getElementById('return_div').style.color = "red";
+			return_error.textContent = "Return date is required";
+			return_date.focus();
+			return false;
+		}
+		
+		if(passengers.value == ""){
+			passengers.style.border = "1px solid red";
+			document.getElementById('passengers_div').style.color = "red";
+			passengers_error.textContent = "Number of passengers is required";
+			passengers.focus();
+			return false;
+		}
+
+		if(faculty.value == ""){
+			faculty.style.border = "1px solid red";
+			document.getElementById('condition_div').style.color = "red";
+			faculty_error.textContent = "The faculty is required";
+			faculty.focus();
+			return false;
+		}
+		
+		if(department.value == ""){
+			department.style.border = "1px solid red";
+			document.getElementById('department_div').style.color = "red";
+			department_error.textContent = "Department is required";
+			department.focus();
+			return false;
+		}
+	}
+
+	//event handler functions
+	function destinationVerify(){
+		if(destination.value != ""){
+			destination.style.border = "1px solid #5e6e66";
+			document.getElementById('destination_div').style.color = "#5e6e66";
+			destination_error.innerHTML = "";
+			return true;
+		}
+	}
+
+	function departureVerify(){
+		if(departure_date.value != ""){
+			departure_date.style.border = "1px solid #5e6e66";
+			document.getElementById('departure_div').style.color = "#5e6e66";
+			departure_error.innerHTML = "";
+			return true;
+		}
+	}
+	
+	function returnVerify(){
+		if(return_date.value != ""){
+			return_date.style.border = "1px solid #5e6e66";
+			document.getElementById('return_div').style.color = "#5e6e66";
+			return_error.innerHTML = "";
+			return true;
+		}
+	}
+	
+	function passengersVerify(){
+		if(passengers.value != ""){
+			passengers.style.border = "1px solid #5e6e66";
+			document.getElementById('passengers_div').style.color = "#5e6e66";
+			passengers_error.innerHTML = "";
+			return true;
+		}
+	}
+	
+	function facultyVerify(){
+		if(faculty.value != ""){
+			faculty.style.border = "1px solid #5e6e66";
+			document.getElementById('faculty_div').style.color = "#5e6e66";
+			faculty_error.innerHTML = "";
+			return true;
+		}
+	}
+	
+	function departmentVerify(){
+		if(department.value != ""){
+			department.style.border = "1px solid #5e6e66";
+			document.getElementById('department_div').style.color = "#5e6e66";
+			department_error.innerHTML = "";
+			return true;
+		}
+	}
+	
+</script>
