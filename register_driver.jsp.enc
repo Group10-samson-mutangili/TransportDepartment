@@ -1,0 +1,51 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Driver registration</title>
+<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+</head>
+<body>
+	
+	<jsp:include page="includes/navbar.jsp"></jsp:include>
+		<div class="container-fluid">
+			<div class="row" >
+			<div class="col-sm-9 main-section">
+			<div class="modal-content">
+
+				<div class="col-12 form-input">
+					 <form action="RegisterDriver" method="POST">
+					 	<div class="form-group">
+					 	<h4 class="text-center">Driver Registration</h4>
+					 		<label for="first_name">First name</label>
+					 		<input type="text" id="first_name" class="form-control" name="first_name" placeholder="Enter first name">
+					 	</div>
+					 	<div class="form-group">
+					 		<label for="last_name">Last name</label>
+					 		<input type="text" id="last_name" class="form-control" name="last_name" placeholder="Enter last name">
+					 	</div>
+					 	<div class="form-group">
+					 		<label for="id_no">ID number</label>
+					 		<input type="number" id="id_no" class="form-control" name="id_no" placeholder="Enter ID number">
+					 	</div>
+					 	<div class="form-group">
+					 		<label for="emp_id">Employee number</label>
+					 		<input type="text" id="emp_id" class="form-control" name="emp_id" placeholder="Enter Employee number">
+					 	</div>
+					 	<div class="form-group">
+					 		<label for="driving_licence">Driving Licence</label>
+					 		<input type="text" id="driving_licence" class="form-control" name="driving_licence" placeholder="Enter Driving Licence">
+					 	</div>
+					 	
+					 	<input type="submit" value="submit" class="btn btn-success" >
+					 </form>
+				</div>
+			</div>
+		</div>
+		</div>
+			
+		</div>
+</body>
+</html>
